@@ -21,6 +21,7 @@ import java.util.Map;
 
 import io.lettuce.core.KillArgs;
 import io.lettuce.core.RedisFuture;
+import io.lettuce.core.TrackingType;
 import io.lettuce.core.UnblockType;
 import io.lettuce.core.protocol.CommandType;
 
@@ -63,6 +64,8 @@ public interface RedisServerAsyncCommands<K, V> {
      * @return simple-string-reply {@code OK} if the connection name was successfully set.
      */
     RedisFuture<String> clientSetname(K name);
+
+    RedisFuture<String> clientTracking(TrackingType type);
 
     /**
      * Kill the connection of a client identified by ip:port.

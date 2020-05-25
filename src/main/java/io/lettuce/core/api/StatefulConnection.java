@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.internal.AsyncCloseable;
 import io.lettuce.core.protocol.RedisCommand;
+import io.lettuce.core.push.RedisPushListener;
 import io.lettuce.core.resource.ClientResources;
 
 /**

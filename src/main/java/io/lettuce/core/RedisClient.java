@@ -30,6 +30,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Supplier;
 
 import io.lettuce.core.internal.ExceptionFactory;
+import io.lettuce.core.push.PushCommandHandler;
+import io.lettuce.core.push.PushEndpoint;
+import io.lettuce.core.push.StatefulRedisPushConnection;
+import io.lettuce.core.push.StatefulRedisPushConnectionImpl;
 import reactor.core.publisher.Mono;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.RedisCodec;
@@ -331,6 +335,10 @@ public class RedisClient extends AbstractRedisClient {
         return getConnection(connectPubSubAsync(newStringStringCodec(), redisURI, getDefaultTimeout()));
     }
 
+    public StatefulRedisPushConnection<String, String> connectPush() {
+        return getConnection(connectPushAsync(newStringStringCodec(), redisURI, getDefaultTimeout()));
+    }
+
     /**
      * Open a new pub/sub connection to a Redis server using the supplied {@link RedisURI} that treats keys and values as UTF-8
      * strings.
@@ -392,6 +400,12 @@ public class RedisClient extends AbstractRedisClient {
         return transformAsyncConnectionException(connectPubSubAsync(codec, redisURI, redisURI.getTimeout()));
     }
 
+    public <K, V> ConnectionFuture<StatefulRedisPushConnection<K, V>> connectPushAsync(RedisCodec<K, V> codec,
+                                                                                      RedisURI redisURI) {
+        assertNotNull(redisURI);
+        return transformAsyncConnectionException(connectPushAsync(codec, redisURI, redisURI.getTimeout()));
+    }
+
     private <K, V> ConnectionFuture<StatefulRedisPubSubConnection<K, V>> connectPubSubAsync(RedisCodec<K, V> codec,
             RedisURI redisURI, Duration timeout) {
 
@@ -409,6 +423,32 @@ public class RedisClient extends AbstractRedisClient {
 
         ConnectionFuture<StatefulRedisPubSubConnection<K, V>> future = connectStatefulAsync(connection, endpoint, redisURI,
                 () -> new PubSubCommandHandler<>(getOptions(), getResources(), codec, endpoint));
+
+        return future.whenComplete((conn, throwable) -> {
+
+            if (throwable != null) {
+                conn.close();
+            }
+        });
+    }
+
+    private <K, V> ConnectionFuture<StatefulRedisPushConnection<K, V>> connectPushAsync(RedisCodec<K, V> codec,
+                                                                                            RedisURI redisURI, Duration timeout) {
+
+        assertNotNull(codec);
+        checkValidRedisURI(redisURI);
+
+        PushEndpoint<K, V> endpoint = new PushEndpoint<>(getOptions(), getResources());
+        RedisChannelWriter writer = endpoint;
+
+        if (CommandExpiryWriter.isSupported(getOptions())) {
+            writer = new CommandExpiryWriter(writer, getOptions(), getResources());
+        }
+
+        StatefulRedisConnectionImpl<K, V> connection = newStatefulRedisPushConnection(writer, codec, timeout, endpoint);
+
+        ConnectionFuture<StatefulRedisPushConnection<K, V>> future = connectStatefulAsync(connection, endpoint, redisURI,
+                () -> new PushCommandHandler<>(getOptions(), getResources(), codec, endpoint));
 
         return future.whenComplete((conn, throwable) -> {
 
@@ -661,6 +701,12 @@ public class RedisClient extends AbstractRedisClient {
     protected <K, V> StatefulRedisConnectionImpl<K, V> newStatefulRedisConnection(RedisChannelWriter channelWriter,
             RedisCodec<K, V> codec, Duration timeout) {
         return new StatefulRedisConnectionImpl<>(channelWriter, codec, timeout);
+    }
+
+    protected <K, V> StatefulRedisPushConnectionImpl<K, V> newStatefulRedisPushConnection(RedisChannelWriter channelWriter,
+                                                                                      RedisCodec<K, V> codec, Duration timeout,
+                                                                                      PushEndpoint<K, V> endpoint) {
+        return new StatefulRedisPushConnectionImpl<>(endpoint, channelWriter, codec, timeout);
     }
 
     /**

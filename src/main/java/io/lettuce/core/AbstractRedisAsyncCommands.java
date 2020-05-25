@@ -211,6 +211,11 @@ public abstract class AbstractRedisAsyncCommands<K, V> implements RedisHashAsync
     }
 
     @Override
+    public RedisFuture<String> clientTracking(TrackingType type) {
+        return dispatch(commandBuilder.clientTracking(type));
+    }
+
+    @Override
     public RedisFuture<Long> clientUnblock(long id, UnblockType type) {
         return dispatch(commandBuilder.clientUnblock(id, type));
     }

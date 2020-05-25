@@ -62,6 +62,8 @@ public interface RedisServerCommands<K, V> {
      */
     String clientSetname(K name);
 
+    String clientTracking(TrackingType type);
+
     /**
      * Kill the connection of a client identified by ip:port.
      *

@@ -278,6 +278,13 @@ class RedisCommandBuilder<K, V> extends BaseRedisCommandBuilder<K, V> {
         return createCommand(CLIENT, new StatusOutput<>(codec), args);
     }
 
+    Command<K, V, String> clientTracking(TrackingType type) {
+        LettuceAssert.notNull(type, "TrackingType " + MUST_NOT_BE_NULL);
+
+        CommandArgs<K, V> args = new CommandArgs<>(codec).add(TRACKING).add(type);
+        return createCommand(CLIENT, new StatusOutput<>(codec), args);
+    }
+
     Command<K, V, Long> clientUnblock(long id, UnblockType type) {
         LettuceAssert.notNull(type, "UnblockType " + MUST_NOT_BE_NULL);
 

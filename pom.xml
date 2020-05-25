@@ -3,7 +3,7 @@
 
     <groupId>io.lettuce</groupId>
     <artifactId>lettuce-core</artifactId>
-    <version>6.0.0.BUILD-SNAPSHOT</version>
+    <version>6.0.0.DSS-CLIENT</version>
     <packaging>jar</packaging>
 
     <name>Lettuce</name>
@@ -90,14 +90,14 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <id>artifactory-snapshots</id>
+            <name>mtgt artifactory snapshots</name>
+            <url>https://artifactory.us-east-1.bamgrid.net/mediatargeting-sbt-local/</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Nexus Release Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>artifactory</id>
+            <name>mtgt artifactory</name>
+            <url>https://artifactory.us-east-1.bamgrid.net/mediatargeting-sbt-local</url>
         </repository>
     </distributionManagement>
 

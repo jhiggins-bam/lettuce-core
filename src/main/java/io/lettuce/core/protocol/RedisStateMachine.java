@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.lettuce.core.LettuceStrings;
+import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.CommandOutput;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -256,7 +257,6 @@ public class RedisStateMachine {
 
                 buffer.markReaderIndex();
             }
-
             switch (state.type) {
                 case SINGLE:
                     if ((bytes = readLine(buffer)) == null) {
@@ -690,7 +690,6 @@ public class RedisStateMachine {
      * @param command
      */
     protected void safeSetSingle(CommandOutput<?, ?, ?> output, ByteBuffer bytes, RedisCommand<?, ?, ?> command) {
-
         try {
             output.set(bytes);
         } catch (Exception e) {

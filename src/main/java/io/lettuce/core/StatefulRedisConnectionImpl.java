@@ -34,6 +34,7 @@ import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.MultiOutput;
 import io.lettuce.core.output.StatusOutput;
 import io.lettuce.core.protocol.*;
+import io.lettuce.core.push.RedisPushListener;
 
 /**
  * A thread-safe connection to a Redis server. Multiple threads may share one {@link StatefulRedisConnectionImpl}
@@ -54,6 +55,7 @@ public class StatefulRedisConnectionImpl<K, V> extends RedisChannelHandler<K, V>
     private final ConnectionState state = new ConnectionState();
 
     protected MultiOutput<K, V> multi;
+    protected List<RedisPushListener> pushListeners;
 
     /**
      * Initialize a new connection.
@@ -70,6 +72,7 @@ public class StatefulRedisConnectionImpl<K, V> extends RedisChannelHandler<K, V>
         this.async = newRedisAsyncCommandsImpl();
         this.sync = newRedisSyncCommandsImpl();
         this.reactive = newRedisReactiveCommandsImpl();
+        this.pushListeners = new ArrayList<>();
     }
 
     @Override
@@ -247,5 +250,9 @@ public class StatefulRedisConnectionImpl<K, V> extends RedisChannelHandler<K, V>
 
     public ConnectionState getConnectionState() {
         return state;
+    }
+
+    public void registerPushMessageListener(RedisPushListener listener) {
+        this.pushListeners.add(listener);
     }
 }
